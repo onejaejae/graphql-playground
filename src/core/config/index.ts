@@ -1,3 +1,10 @@
+export interface AppConfig {
+  PORT: string | number;
+  ENV: string;
+  NAME: string;
+  BASE_URL: string;
+}
+
 export interface DBConfig {
   DB_HOST: string;
   DB_USER_NAME: string;
@@ -7,5 +14,6 @@ export interface DBConfig {
 }
 
 export interface Configurations {
+  APP: AppConfig;
   DB: DBConfig;
 }
