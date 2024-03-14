@@ -10,6 +10,7 @@ import { EntityManager } from 'typeorm';
 export class TransactionManager {
   getEntityManager(): EntityManager {
     const nameSpace = getNamespace(BOILER_NAMESPACE);
+
     if (!nameSpace || !nameSpace.active)
       throw new InternalServerErrorException(
         `${BOILER_NAMESPACE} is not active`,

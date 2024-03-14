@@ -2,6 +2,102 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""유저"""
+type User {
+  """id"""
+  id: Int!
+
+  """이메일"""
+  email: String!
+  posts: [Post!]!
+}
+
+"""유저 목록"""
+type UserList {
+  """전체 데이터 개수"""
+  totalCount: Int!
+
+  """리스트"""
+  list: [User!]!
+
+  """페이지"""
+  page: Int!
+
+  """테이크"""
+  take: Int!
+
+  """전체 페이지"""
+  totalPages: Int!
+
+  """next 유무"""
+  hasNext: Boolean!
+}
+
+"""게시글"""
+type Post {
+  """id"""
+  id: Int!
+
+  """제목"""
+  title: String!
+
+  """내용"""
+  content: String!
+  author: User!
+}
+
+"""게시글 리스트"""
+type PostList {
+  """전체 데이터 개수"""
+  totalCount: Int!
+
+  """리스트"""
+  list: [Post!]!
+
+  """페이지"""
+  page: Int!
+
+  """테이크"""
+  take: Int!
+
+  """전체 페이지"""
+  totalPages: Int!
+
+  """next 유무"""
+  hasNext: Boolean!
+}
+
 type Query {
-  hello: String!
+  getAll: [User!]!
+  getAllWithPagination(
+    """page"""
+    page: Int! = 1
+
+    """take"""
+    take: Int! = 10
+  ): UserList!
+  getPosts(
+    """page"""
+    page: Int! = 1
+
+    """take"""
+    take: Int! = 10
+  ): PostList!
+  getPostById(postId: Int!): Post!
+}
+
+type Mutation {
+  createPost(data: CreatePostDto!): Post!
+}
+
+"""게시글 생성 데이터"""
+input CreatePostDto {
+  """제목"""
+  title: String!
+
+  """내용"""
+  content: String!
+
+  """게시글 생성 유저 id"""
+  userId: Int!
 }

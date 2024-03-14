@@ -12,6 +12,9 @@ export class TransactionMiddleware implements NestMiddleware {
   private readonly logger: Logger = new Logger(TransactionMiddleware.name);
   constructor(private readonly em: EntityManager) {}
   use(_req: Request, _res: Response, next: NextFunction) {
+    // this.logger.log(`Hit TransactionMiddleware`);
+    // next();
+
     const namespace =
       getNamespace(BOILER_NAMESPACE) ?? createNamespace(BOILER_NAMESPACE);
     this.logger.log(`Hit TransactionMiddleware`);

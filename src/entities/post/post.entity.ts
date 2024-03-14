@@ -19,4 +19,13 @@ export class Post extends BaseEntity {
   })
   @JoinColumn([{ name: 'user_id', referencedColumnName: 'id' }])
   Author: User;
+
+  static of(title: string, content: string, userId: number) {
+    const post = new Post();
+    post.title = title;
+    post.content = content;
+    post.userId = userId;
+
+    return post;
+  }
 }

@@ -13,4 +13,11 @@ export class PostRepository extends GenericTypeOrmRepository<Post> {
   getName(): EntityTarget<Post> {
     return Post.name;
   }
+
+  getPostWithAuthor(postId: number) {
+    return this.getRepository().findOne({
+      where: { id: postId },
+      relations: ['Author'],
+    });
+  }
 }

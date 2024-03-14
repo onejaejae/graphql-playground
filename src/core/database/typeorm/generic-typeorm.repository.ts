@@ -1,13 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   EntityTarget,
+  FindManyOptions,
   FindOneOptions,
+  FindOptionsWhere,
+  In,
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
 import { TransactionManager } from './transaction.manager';
 import { ClassConstructor, plainToInstance } from 'class-transformer';
 import { RootEntity } from './root.entity';
+import { PaginationRequest } from 'src/common/pagination/pagination.request';
+import { PaginationBuilder } from 'src/common/pagination/pagination.builder';
 
 @Injectable()
 export abstract class GenericTypeOrmRepository<T extends RootEntity> {
@@ -16,6 +21,40 @@ export abstract class GenericTypeOrmRepository<T extends RootEntity> {
   constructor(private readonly classType: ClassConstructor<T>) {}
 
   abstract getName(): EntityTarget<T>;
+
+  async paginate(
+    pagination: PaginationRequest,
+    findManyOption?: FindManyOptions<T>,
+  ) {
+    const { take, page } = pagination;
+    const options = {
+      take,
+      skip: (page - 1) * take,
+      ...findManyOption,
+    };
+
+    const [data, total] = await this.getRepository().findAndCount(options);
+
+    return new PaginationBuilder<T>()
+      .setData(plainToInstance(this.classType, data))
+      .setPage(page)
+      .setTake(take)
+      .setTotalCount(total)
+      .build();
+  }
+
+  async find(filters: Partial<T>) {
+    const res = await this.getRepository().find(filters);
+    return res;
+  }
+
+  async findByIds(key: keyof Partial<T>, ids: number[]) {
+    const whereClause: FindOptionsWhere<any> = { [key]: In(ids) };
+    const res = await this.getRepository().find({
+      where: whereClause,
+    });
+    return res;
+  }
 
   async findOne(filters: Partial<T>): Promise<T> {
     const findOption: FindOneOptions = { where: filters };

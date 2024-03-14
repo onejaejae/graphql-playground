@@ -13,6 +13,7 @@ import { TypeORMError } from 'typeorm';
 import { TypeORMException } from '../exception/typeorm.exception';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { GqlContextType, GqlExecutionContext } from '@nestjs/graphql';
 
 @Injectable()
 export class ErrorInterceptor implements NestInterceptor {
@@ -41,38 +42,72 @@ export class ErrorInterceptor implements NestInterceptor {
       `${context.getClass().name}.${context.getHandler().name}`,
     );
 
-    return next.handle().pipe(
-      catchError((err) => {
-        const returnObj: Record<string, any> = {
-          message: err.message,
-        };
+    const type = context.getType<GqlContextType>();
 
-        returnObj.callClass = context.getClass().name;
-        returnObj.callMethod = context.getHandler().name;
-        returnObj.stack = err.stack;
+    if (type === 'graphql') {
+      const ctx = GqlExecutionContext.create(context);
 
-        if (err instanceof HttpException) {
+      return next.handle().pipe(
+        catchError((err) => {
+          const returnObj: Record<string, any> = {
+            message: err.message,
+            callClass: ctx.getClass().name,
+            callMethod: ctx.getHandler().name,
+            stack: err.stack,
+          };
+
+          // if (err instanceof HttpException) {
+          //   logError(err);
+
+          //   const payload = err.getResponse();
+          //   ctx.switchToHttp().getResponse().status(err.getStatus());
+
+          //   return of({
+          //     ...returnObj,
+          //     ...(typeof payload === 'string' ? { message: payload } : payload),
+          //   });
+          // }
+
           logError(err);
+          this.propagateException(err, returnObj);
 
-          const payload = err.getResponse();
-          context.switchToHttp().getResponse().status(err.getStatus());
+          return of(returnObj);
+        }),
+      );
+    }
 
-          return of({
-            ...returnObj,
-            ...(typeof payload === 'string' ? { message: payload } : payload),
-          });
-        }
+    // return next.handle().pipe(
+    //   catchError((err) => {
+    //     const returnObj: Record<string, any> = {
+    //       message: err.message,
+    //     };
 
-        logError(err);
-        context
-          .switchToHttp()
-          .getResponse()
-          .status(HttpStatus.INTERNAL_SERVER_ERROR);
+    //     returnObj.callClass = context.getClass().name;
+    //     returnObj.callMethod = context.getHandler().name;
+    //     returnObj.stack = err.stack;
 
-        this.propagateException(err, returnObj);
+    //     if (err instanceof HttpException) {
+    //       logError(err);
 
-        return of(returnObj);
-      }),
-    );
+    //       const payload = err.getResponse();
+    //       context.switchToHttp().getResponse().status(err.getStatus());
+
+    //       return of({
+    //         ...returnObj,
+    //         ...(typeof payload === 'string' ? { message: payload } : payload),
+    //       });
+    //     }
+
+    //     logError(err);
+    //     context
+    //       .switchToHttp()
+    //       .getResponse()
+    //       .status(HttpStatus.INTERNAL_SERVER_ERROR);
+
+    //     this.propagateException(err, returnObj);
+
+    //     return of(returnObj);
+    //   }),
+    // );
   }
 }
