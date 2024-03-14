@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
+  DeepPartial,
   EntityTarget,
   FindManyOptions,
   FindOneOptions,
@@ -97,6 +98,11 @@ export abstract class GenericTypeOrmRepository<T extends RootEntity> {
     const res = await this.getRepository().save(entity);
 
     return plainToInstance(this.classType, res);
+  }
+
+  async updateOneByMerge(entity: T, datas: DeepPartial<T>): Promise<T> {
+    const res = this.getRepository().merge(entity, datas);
+    return this.getRepository().save(res);
   }
 
   async deleteById(id: number) {

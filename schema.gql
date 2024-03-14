@@ -83,11 +83,19 @@ type Query {
     """take"""
     take: Int! = 10
   ): PostList!
-  getPostById(postId: Int!): Post!
+  getPostById(
+    """게시글 id"""
+    postId: Int!
+  ): Post!
 }
 
 type Mutation {
   createPost(data: CreatePostDto!): Post!
+  updatePost(
+    """게시글 id"""
+    postId: Int!
+    data: UpdatePostDto!
+  ): Post!
 }
 
 """게시글 생성 데이터"""
@@ -100,4 +108,16 @@ input CreatePostDto {
 
   """게시글 생성 유저 id"""
   userId: Int!
+}
+
+"""게시글 수정 데이터"""
+input UpdatePostDto {
+  """제목"""
+  title: String
+
+  """내용"""
+  content: String
+
+  """게시글 생성 유저 id"""
+  userId: Int
 }

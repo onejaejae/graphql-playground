@@ -22,8 +22,16 @@ export class UserResolver {
     return this.userService.getAllWithPagination(args);
   }
 
-  @ResolveField((returns) => [Post])
-  async posts(@Parent() user: User): Promise<Post[]> {
+  @ResolveField('posts', (returns) => [Post])
+  async getPosts(@Parent() user: User): Promise<Post[]> {
     return this.postLoader.findAllByUserId.load(user.id);
   }
+
+  // @Query((returns) => String)
+  // test(
+  //   @Args('firstName', { nullable: false }) firstName?: string,
+  //   @Args('lastName', { defaultValue: '' }) lastName?: string,
+  // ) {
+  //   return 'ASDASD';
+  // }
 }

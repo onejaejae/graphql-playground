@@ -14,6 +14,7 @@ import { User } from 'src/model/user/user.model';
 import { Post } from 'src/entities/post/post.entity';
 import { UserLoader } from 'src/loader/user/user.loader';
 import { PostListArgs } from 'src/common/request/post/get-postList.dto';
+import { UpdatePostDto } from 'src/common/request/post/update-post.dto';
 
 @Resolver((of) => postModel)
 export class PostResolver {
@@ -29,9 +30,15 @@ export class PostResolver {
 
   @Query((returns) => postModel)
   async getPostById(
-    @Args('postId', { type: () => Int }) postId: number,
+    @Args('postId', { description: '게시글 id', type: () => Int })
+    postId: number,
   ): Promise<Post> {
     return this.postService.getPostWithAuthor(postId);
+  }
+
+  @ResolveField((returns) => User)
+  async author(@Parent() post: Post): Promise<User> {
+    return this.userLoader.findByUserId.load(post.userId);
   }
 
   @Mutation(() => postModel)
@@ -39,8 +46,13 @@ export class PostResolver {
     return this.postService.createPost(createPostDto);
   }
 
-  @ResolveField((returns) => User)
-  async author(@Parent() post: Post): Promise<User> {
-    return this.userLoader.findByUserId.load(post.userId);
+  @Mutation(() => postModel)
+  async updatePost(
+    @Args('postId', { description: '게시글 id', type: () => Int })
+    postId: number,
+    @Args('data')
+    updatePostDto: UpdatePostDto,
+  ): Promise<Post> {
+    return this.postService.updatePost(postId, updatePostDto);
   }
 }
